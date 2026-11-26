@@ -104,3 +104,18 @@ struct PermissionButtonTests {
         #expect(Onboarding.permissionAction(alreadyRequested: true) == .openSystemSettings)
     }
 }
+
+// User story: after "Quit & Reopen" (or FnLock restarting itself) the Welcome window comes back,
+// because I haven't finished setup. Only my own Done or close button finishes it.
+@Suite("Finishing setup")
+struct OnboardingCompletionTests {
+    @Test("clicking Done or the close button finishes setup")
+    func userCloseFinishes() {
+        #expect(Onboarding.closingFinishesSetup(appIsQuitting: false))
+    }
+
+    @Test("the window closing because FnLock quits or restarts does not finish setup")
+    func quitDoesNotFinish() {
+        #expect(!Onboarding.closingFinishesSetup(appIsQuitting: true))
+    }
+}

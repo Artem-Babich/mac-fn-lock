@@ -24,6 +24,9 @@ public struct Onboarding: Equatable, Sendable {
         alreadyRequested ? .openSystemSettings : .showSystemPrompt
     }
 
+    /// AppKit closes windows when the app quits ("Quit & Reopen", our own restart); that is not the user finishing.
+    public static func closingFinishesSetup(appIsQuitting: Bool) -> Bool { !appIsQuitting }
+
     public static func shouldShowAtLaunch(completed: Bool, inputMonitoring: Bool) -> Bool {
         !completed || !inputMonitoring
     }

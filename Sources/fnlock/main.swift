@@ -172,6 +172,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         welcome = MainActor.assumeIsolated { WelcomeWindowController(inputMonitoring: inputMonitoring) }
     }
 
+    /// Runs first on any quit ("Quit & Reopen" included), before AppKit closes windows.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        MainActor.assumeIsolated { welcome.appIsQuitting = true }
+        return .terminateNow
+    }
+
     /// FnLock has no menu bar icon: opening the app again brings the Welcome window back.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         MainActor.assumeIsolated { welcome.show() }

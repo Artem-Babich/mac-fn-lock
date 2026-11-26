@@ -41,5 +41,6 @@
 - The first click on "Allow…" shows only the macOS permission prompt, which has its own "Open System Settings" button. After that, the button reads "Open System Settings" and opens Input Monitoring itself.
 - Step 1 explains that either "Quit & Reopen" or "Later" works, because FnLock restarts by itself.
 - Each step ticks itself off: the globe key setting is re-read every second, and step 3 is done after the first switch.
-- "Done" is available once Input Monitoring is allowed. Closing the window marks setup as finished.
+- "Done" is available once Input Monitoring is allowed.
+- Setup is finished only when the user clicks Done or closes the window. The window closing because FnLock quits or restarts ("Quit & Reopen") doesn't finish setup, so the window comes back after the restart.
 - Only one listener runs at a time. Running `fnlock` while one is already running prints a message and exits.

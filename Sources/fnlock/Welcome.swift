@@ -69,9 +69,15 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private var timer: Timer?
 
+    var appIsQuitting = false
+
     init(inputMonitoring: Bool) {
         model = WelcomeModel(inputMonitoring: inputMonitoring)
         super.init()
+        NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil,
+                                               queue: nil) { [weak self] _ in
+            MainActor.assumeIsolated { self?.appIsQuitting = true }
+        }
     }
 
     func show() {
@@ -100,7 +106,12 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         timer?.invalidate()
         timer = nil
-        UserDefaults.standard.set(true, forKey: Self.completedKey)
+        if Onboarding.closingFinishesSetup(appIsQuitting: appIsQuitting) {
+            UserDefaults.standard.set(true, forKey: Self.completedKey)
+            log("welcome closed by user: setup finished")
+        } else {
+            log("welcome closed because FnLock is quitting: setup not finished")
+        }
     }
 }
 
