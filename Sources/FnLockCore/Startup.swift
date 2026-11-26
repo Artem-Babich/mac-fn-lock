@@ -39,10 +39,10 @@ public final class SingleInstanceLock {
     deinit { if fd >= 0 { close(fd) } }
 }
 
-/// How long fn must be held: FNLOCK_HOLD_SECONDS, else `defaults … holdSeconds`, else 1 s.
+/// How long fn must be held: FNLOCK_HOLD_SECONDS, else `defaults … holdSeconds`, else 0.6 s.
 public enum HoldSetting {
     public static func seconds(environment: String?, saved: Double?) -> Double {
-        [environment.flatMap(Double.init), saved].compactMap { $0 }.first { $0 > 0 } ?? 1.0
+        [environment.flatMap(Double.init), saved].compactMap { $0 }.first { $0 > 0 } ?? 0.6
     }
 }
 

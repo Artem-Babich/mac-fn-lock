@@ -1,6 +1,6 @@
 # mac-fn-lock
 
-**Fn Lock for macOS: hold the `fn` key for about a second to switch the top row between F1–F12 and media keys.**
+**Fn Lock for macOS: hold the `fn` key for half a second to switch the top row between F1–F12 and media keys.**
 
 Windows laptops have an Fn Lock key. Macs only have a checkbox deep in System Settings
 ("Use F1, F2, etc. keys as standard function keys"). This tool flips that checkbox when you
@@ -53,7 +53,7 @@ If you installed from the DMG, quit FnLock (`pkill -x fnlock`) and move it to th
 
 | Action | Result |
 |---|---|
-| Hold `fn` alone for ~1 s | Switch mode (with an overlay and a sound) |
+| Hold `fn` alone for ~0.6 s | Switch mode (with an overlay and a sound) |
 | `fnlock status` | Print the current mode |
 | `fnlock toggle` | Switch once from the terminal |
 
@@ -62,7 +62,7 @@ Homebrew puts `fnlock` on your PATH. With the DMG, the command is at
 
 ### Configuration
 
-To change how long you need to hold `fn` (default `1.0` seconds):
+To change how long you need to hold `fn` (default `0.6` seconds):
 
 ```bash
 defaults write rs.babich.fnlock holdSeconds 1.5

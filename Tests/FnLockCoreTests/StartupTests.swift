@@ -92,9 +92,9 @@ struct SingleInstanceLockTests {
 // variable still works when I run fnlock from a terminal, and wins over the saved setting.
 @Suite("Hold duration setting")
 struct HoldSettingTests {
-    @Test("with nothing set, fn must be held for 1 second")
+    @Test("with nothing set, fn must be held for 0.6 seconds")
     func defaultIsOneSecond() {
-        #expect(HoldSetting.seconds(environment: nil, saved: nil) == 1.0)
+        #expect(HoldSetting.seconds(environment: nil, saved: nil) == 0.6)
     }
 
     @Test("a duration saved with defaults write is used")
@@ -110,7 +110,7 @@ struct HoldSettingTests {
     @Test("an unreadable or non-positive value falls back to the next source")
     func invalidValuesIgnored() {
         #expect(HoldSetting.seconds(environment: "abc", saved: 1.5) == 1.5)
-        #expect(HoldSetting.seconds(environment: "0", saved: -2) == 1.0)
+        #expect(HoldSetting.seconds(environment: "0", saved: -2) == 0.6)
     }
 }
 

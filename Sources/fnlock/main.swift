@@ -142,7 +142,7 @@ func startTap() {
     listener.tap = tap
     CFRunLoopAddSource(CFRunLoopGetCurrent(), CFMachPortCreateRunLoopSource(nil, tap, 0), .commonModes)
     CGEvent.tapEnable(tap: tap, enable: true)
-    log("listening; hold fn for \(holdSeconds)s to toggle (current: \(FnKeyMode.get().map(modeName) ?? "unknown"))")
+    log("listening; hold fn for \(String(format: "%.2g", holdSeconds))s to toggle (current: \(FnKeyMode.get().map(modeName) ?? "unknown"))")
 }
 
 /// A fresh process sees a new Input Monitoring grant; this one keeps its launch-time answer.

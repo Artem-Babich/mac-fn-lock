@@ -126,7 +126,7 @@ private struct WelcomeView: View {
                 Image(nsImage: Self.appIcon).resizable().interpolation(.high).frame(width: 84, height: 84)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Welcome to FnLock").font(.system(size: 24, weight: .bold))
-                    Text("Hold fn for a second to switch the top row between F1–F12 and media keys.")
+                    Text("Hold fn for half a second to switch the top row between F1–F12 and media keys.")
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -146,7 +146,7 @@ private struct WelcomeView: View {
                 Divider()
                 StepRow(number: 2, title: "Try it",
                         hint: o.tryStep == .locked ? "Available after step 1."
-                            : "Hold fn alone for about a second. Current mode: \(model.standardKeys ? "F1–F12" : "Media keys").",
+                            : "Hold fn alone for half a second. Current mode: \(model.standardKeys ? "F1–F12" : "Media keys").",
                         state: o.tryStep) { EmptyView() }
             }
             .padding(.horizontal, 16)

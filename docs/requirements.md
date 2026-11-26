@@ -1,8 +1,8 @@
 # Functional requirements
 
 ## Mode switching
-- Holding `fn` alone for about a second switches the top row between F1–F12 and media keys.
-- The hold time defaults to 1.0 s. It can be changed with `defaults write rs.babich.fnlock holdSeconds <s>`, or with `FNLOCK_HOLD_SECONDS`, which takes priority. Values that can't be read, or are ≤ 0, are ignored.
+- Holding `fn` alone for about half a second switches the top row between F1–F12 and media keys.
+- The hold time defaults to 0.6 s. It can be changed with `defaults write rs.babich.fnlock holdSeconds <s>`, or with `FNLOCK_HOLD_SECONDS`, which takes priority. Values that can't be read, or are ≤ 0, are ignored.
 - A short `fn` press, or `fn` used with another key or a mouse click, never switches the mode.
 - One long hold switches the mode once.
 - System Settings ("Use F1, F2, etc. keys as standard function keys") stays in sync, and the mode survives a reboot.
