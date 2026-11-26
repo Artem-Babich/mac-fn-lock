@@ -26,5 +26,18 @@
 ## Start at login
 - On its first launch from an app bundle, the app adds itself to Login Items, once. If the user turns it off in System Settings → Login Items, it stays off.
 - On launch, the app removes LaunchAgents left by older versions (`rs.babich.fnlock`, `ai.fnlock`) and stops them, so two copies never run at once.
-- On first launch without Input Monitoring, FnLock asks for it and starts working as soon as it is allowed, without a restart.
+- FnLock never asks for Input Monitoring by itself at launch. It asks only from the Welcome window.
+- Once Input Monitoring is allowed, FnLock restarts itself within a few seconds and starts working. The user doesn't need "Quit & Reopen", and choosing "Later" doesn't leave it broken.
+- A restarted copy waits for the old one to exit, so a restart never leaves FnLock stopped.
+
+## Welcome window
+- Opens at launch until setup has been finished once, and on every launch while Input Monitoring is missing.
+- Opening FnLock again (Finder, Launchpad, Spotlight) while it runs brings the window back.
+- The window is in English and shows three steps:
+  1. Allow Input Monitoring.
+  2. Set "Press 🌐 key to" to "Do Nothing" (recommended).
+  3. Try it: hold fn. The window shows the current mode.
+- Steps 2 and 3 are locked until step 1 is done.
+- Each step ticks itself off: the globe key setting is re-read every second, and step 3 is done after the first switch.
+- "Done" is available once Input Monitoring is allowed. Closing the window marks setup as finished.
 - Only one listener runs at a time. Running `fnlock` while one is already running prints a message and exits.

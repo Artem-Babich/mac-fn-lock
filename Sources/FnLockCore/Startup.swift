@@ -24,10 +24,16 @@ public enum LegacyLaunchAgents {
 public final class SingleInstanceLock {
     private let fd: Int32
 
-    public init?(path: String) {
-        fd = open(path, O_CREAT | O_RDWR, 0o600)
+    /// `waitSeconds`: keep retrying that long, so a restarted copy can take over from one still exiting.
+    public init?(path: String, waitSeconds: Double = 0) {
+        fd = open(path, O_CREAT | O_RDWR | O_CLOEXEC, 0o600)
         // A failed init still runs deinit (all properties are set), which closes fd.
-        guard fd >= 0, flock(fd, LOCK_EX | LOCK_NB) == 0 else { return nil }
+        guard fd >= 0 else { return nil }
+        let deadline = Date().addingTimeInterval(waitSeconds)
+        while flock(fd, LOCK_EX | LOCK_NB) != 0 {
+            guard Date() < deadline else { return nil }
+            usleep(50_000)
+        }
     }
 
     deinit { if fd >= 0 { close(fd) } }

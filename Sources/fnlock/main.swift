@@ -24,15 +24,24 @@ func toggle() {
     log("toggled to \(modeName(next)) (applied=\(ok))")
     NSSound(named: next ? "Tink" : "Pop")?.play()
     MainActor.assumeIsolated { HUD.shared.show(standardKeys: next) } // always called on the main queue
+    NotificationCenter.default.post(name: .fnLockToggled, object: nil)
+}
+
+switch CommandLine.arguments.dropFirst().first {
+case "status":
+    print(FnKeyMode.get().map(modeName) ?? "unknown")
+    exit(0)
+case "check-permission":
+    // Internal: a fresh process sees a new Input Monitoring grant; the running listener does not.
+    exit(CGPreflightListenEventAccess() ? 0 : 1)
+default:
+    break
 }
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 
 switch CommandLine.arguments.dropFirst().first {
-case "status":
-    print(FnKeyMode.get().map(modeName) ?? "unknown")
-    exit(0)
 case "toggle":
     toggle()
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { exit(0) } // let the sound and overlay finish
@@ -42,18 +51,25 @@ default:
     break
 }
 
-// One listener per user: a second one would toggle twice per hold.
-let lockPath = FileManager.default.temporaryDirectory.appendingPathComponent("\(bundleID).lock").path
-guard let instanceLock = SingleInstanceLock(path: lockPath) else {
-    print("FnLock is already running.")
-    exit(0)
-}
-
 // Started from Login Items or Finder there is no terminal: keep the log in ~/Library/Logs.
 if isatty(STDERR_FILENO) == 0 {
     let logs = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs")
     try? FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)
     freopen(logs.appendingPathComponent("fnlock.log").path, "a", stderr)
+}
+let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+log("start pid=\(getpid()) version=\(version) parent=\(getppid()) path=\(Bundle.main.bundlePath)")
+
+// One listener per user: a second one would toggle twice per hold.
+let lockPath = FileManager.default.temporaryDirectory.appendingPathComponent("\(bundleID).lock").path
+// A restarted copy (our own restart, or "Quit & Reopen") may start while the old one is still exiting.
+guard let instanceLock = SingleInstanceLock(path: lockPath, waitSeconds: 5) else {
+    log("another listener holds \(lockPath); exiting")
+    print("FnLock is already running.")
+    exit(0)
+}
+NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: nil) { _ in
+    log("terminating (quit requested)")
 }
 
 // install.sh used to start FnLock with a LaunchAgent; stop those copies so only this one runs.
@@ -129,22 +145,65 @@ func startTap() {
     log("listening; hold fn for \(holdSeconds)s to toggle (current: \(FnKeyMode.get().map(modeName) ?? "unknown"))")
 }
 
+/// A fresh process sees a new Input Monitoring grant; this one keeps its launch-time answer.
+func permissionGrantedInFreshProcess() -> Bool {
+    let p = Process()
+    p.executableURL = Bundle.main.executableURL
+    p.arguments = ["check-permission"]
+    guard (try? p.run()) != nil else { return false }
+    p.waitUntilExit()
+    return p.terminationStatus == 0
+}
+
+/// Start a new copy and exit; the new copy waits for our lock, then creates its tap with the grant.
+func relaunch() {
+    log("input monitoring granted; restarting so macOS delivers key events")
+    let p = Process()
+    p.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+    p.arguments = ["-n", Bundle.main.bundlePath]
+    try? p.run()
+    exit(0)
+}
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    let welcome: WelcomeWindowController
+
+    init(inputMonitoring: Bool) {
+        welcome = MainActor.assumeIsolated { WelcomeWindowController(inputMonitoring: inputMonitoring) }
+    }
+
+    /// FnLock has no menu bar icon: opening the app again brings the Welcome window back.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        MainActor.assumeIsolated { welcome.show() }
+        return false
+    }
+}
+
 // macOS never delivers keyboard events to a tap created before Input Monitoring was granted, and
-// nothing restarts a Login Item, so create the tap only once the permission is there.
+// never tells this process about a later grant. So: tap now if allowed; otherwise watch from fresh
+// processes and restart once it is allowed. The permission is only requested from the Welcome window.
 var listenerStart = ListenerStart()
 let granted = CGPreflightListenEventAccess()
 log("input monitoring granted=\(granted)")
 if listenerStart.check(permissionGranted: granted) {
     startTap()
 } else {
-    CGRequestListenEventAccess()
     log("waiting for Input Monitoring permission: allow FnLock in System Settings → Privacy & Security → Input Monitoring")
-    Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { timer in
-        if listenerStart.check(permissionGranted: CGPreflightListenEventAccess()) {
-            timer.invalidate()
-            log("input monitoring granted=true")
-            startTap()
+    var checks = 0
+    Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+        let nowGranted = permissionGrantedInFreshProcess()
+        checks += 1
+        if checks % 15 == 0 { log("still waiting: granted=\(nowGranted) after \(checks * 2)s") }
+        if listenerStart.check(permissionGranted: nowGranted) {
+            if runningFromApp { relaunch() } else { log("input monitoring granted; restart fnlock to start listening") }
         }
     }
+}
+
+let delegate = AppDelegate(inputMonitoring: granted)
+app.delegate = delegate
+if runningFromApp, Onboarding.shouldShowAtLaunch(
+    completed: UserDefaults.standard.bool(forKey: WelcomeWindowController.completedKey), inputMonitoring: granted) {
+    MainActor.assumeIsolated { delegate.welcome.show() }
 }
 withExtendedLifetime(instanceLock) { app.run() }
