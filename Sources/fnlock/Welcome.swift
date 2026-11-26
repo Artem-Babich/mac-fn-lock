@@ -37,9 +37,13 @@ final class WelcomeModel: ObservableObject {
     }
 
     func requestInputMonitoring() {
+        switch Onboarding.permissionAction(alreadyRequested: permissionRequested) {
+        case .showSystemPrompt:
+            CGRequestListenEventAccess() // adds FnLock to the list and shows the macOS prompt
+        case .openSystemSettings:
+            Self.open("x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")
+        }
         permissionRequested = true
-        CGRequestListenEventAccess() // adds FnLock to the list; shows the system prompt the first time
-        Self.open("x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")
     }
 
     static func openKeyboardSettings() {
@@ -133,7 +137,7 @@ private struct WelcomeView: View {
             VStack(spacing: 0) {
                 StepRow(number: 1, title: "Allow Input Monitoring",
                         hint: model.permissionRequested
-                            ? "Switch on FnLock in System Settings. FnLock restarts by itself when you do."
+                            ? "Click Open System Settings in the macOS prompt and switch on FnLock. If macOS offers Quit & Reopen, either button works: FnLock restarts by itself."
                             : "FnLock needs it to see the fn key. It only listens and never records what you type.",
                         state: o.inputMonitoringStep) {
                     Button(model.permissionRequested ? "Open System Settings" : "Allow…") {

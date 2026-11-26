@@ -38,6 +38,8 @@
   2. Set "Press 🌐 key to" to "Do Nothing" (recommended).
   3. Try it: hold fn. The window shows the current mode.
 - Steps 2 and 3 are locked until step 1 is done.
+- The first click on "Allow…" shows only the macOS permission prompt, which has its own "Open System Settings" button. After that, the button reads "Open System Settings" and opens Input Monitoring itself.
+- Step 1 explains that either "Quit & Reopen" or "Later" works, because FnLock restarts by itself.
 - Each step ticks itself off: the globe key setting is re-read every second, and step 3 is done after the first switch.
 - "Done" is available once Input Monitoring is allowed. Closing the window marks setup as finished.
 - Only one listener runs at a time. Running `fnlock` while one is already running prints a message and exits.

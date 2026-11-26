@@ -88,3 +88,19 @@ struct LockHandOverTests {
         _ = old
     }
 }
+
+// User story: when I click Allow, I see only the macOS permission prompt; it has its own
+// "Open System Settings" button. FnLock opens System Settings itself only if I click again
+// (for example after closing or denying the prompt), so windows don't pile up.
+@Suite("Allow button")
+struct PermissionButtonTests {
+    @Test("the first click shows only the macOS permission prompt")
+    func firstClickPrompts() {
+        #expect(Onboarding.permissionAction(alreadyRequested: false) == .showSystemPrompt)
+    }
+
+    @Test("a later click opens Input Monitoring in System Settings")
+    func laterClickOpensSettings() {
+        #expect(Onboarding.permissionAction(alreadyRequested: true) == .openSystemSettings)
+    }
+}
