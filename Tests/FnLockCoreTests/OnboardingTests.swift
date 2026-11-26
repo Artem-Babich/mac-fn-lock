@@ -94,3 +94,19 @@ struct OnboardingCompletionTests {
         #expect(!Onboarding.closingFinishesSetup(appIsQuitting: true))
     }
 }
+
+// User story: I allow Input Monitoring while the Welcome window is open. FnLock restarts (by itself or
+// via "Quit & Reopen") and the window comes back with step 1 ticked, so I see it worked and can try it,
+// even if I had finished setup before (for example, permission was reset by an update).
+@Suite("Welcome window after a restart")
+struct WelcomeAfterRestartTests {
+    @Test("if the window was open when FnLock restarted, it opens again")
+    func reopensAfterRestart() {
+        #expect(Onboarding.shouldShowAtLaunch(completed: true, inputMonitoring: true, wasOpenAtQuit: true))
+    }
+
+    @Test("if the user had closed the window, a restart does not bring it back")
+    func staysClosedAfterUserClose() {
+        #expect(!Onboarding.shouldShowAtLaunch(completed: true, inputMonitoring: true, wasOpenAtQuit: false))
+    }
+}

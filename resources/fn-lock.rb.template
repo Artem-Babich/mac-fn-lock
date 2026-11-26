@@ -7,7 +7,7 @@ cask "fn-lock" do
   desc "Hold the fn key to switch the top row between F1–F12 and media keys"
   homepage "https://github.com/Artem-Babich/mac-fn-lock"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   app "FnLock.app"
   binary "#{appdir}/FnLock.app/Contents/MacOS/fnlock"
