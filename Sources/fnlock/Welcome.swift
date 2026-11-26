@@ -52,6 +52,8 @@ final class WelcomeModel: ObservableObject {
 @MainActor
 final class WelcomeWindowController: NSObject, NSWindowDelegate {
     nonisolated static let completedKey = "onboardingCompleted"
+    /// True while the window is open; survives quits and restarts, cleared when the user closes it.
+    nonisolated static let openKey = "welcomeOpen"
     let model: WelcomeModel
     private var window: NSWindow?
     private var timer: Timer?
@@ -86,6 +88,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.model.refresh() }
         }
+        UserDefaults.standard.set(true, forKey: Self.openKey)
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
     }
@@ -94,6 +97,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
         timer?.invalidate()
         timer = nil
         if Onboarding.closingFinishesSetup(appIsQuitting: appIsQuitting) {
+            UserDefaults.standard.set(false, forKey: Self.openKey)
             UserDefaults.standard.set(true, forKey: Self.completedKey)
             log("welcome closed by user: setup finished")
         } else {

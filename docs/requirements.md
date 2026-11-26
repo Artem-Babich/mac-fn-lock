@@ -33,6 +33,7 @@
 
 ## Welcome window
 - Opens at launch until setup has been finished once, and on every launch while Input Monitoring is missing.
+- If the window was open when FnLock quit or restarted (its own restart after the grant, or "Quit & Reopen"), it opens again after the restart, so the user sees step 1 ticked. This holds even if setup was finished before.
 - Opening FnLock again (Finder, Launchpad, Spotlight) while it runs brings the window back.
 - The window is in English and shows two steps:
   1. Allow Input Monitoring.

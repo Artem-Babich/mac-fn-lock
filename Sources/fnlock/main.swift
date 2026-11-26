@@ -209,7 +209,8 @@ if listenerStart.check(permissionGranted: granted) {
 let delegate = AppDelegate(inputMonitoring: granted)
 app.delegate = delegate
 if runningFromApp, Onboarding.shouldShowAtLaunch(
-    completed: UserDefaults.standard.bool(forKey: WelcomeWindowController.completedKey), inputMonitoring: granted) {
+    completed: UserDefaults.standard.bool(forKey: WelcomeWindowController.completedKey), inputMonitoring: granted,
+    wasOpenAtQuit: UserDefaults.standard.bool(forKey: WelcomeWindowController.openKey)) {
     MainActor.assumeIsolated { delegate.welcome.show() }
 }
 withExtendedLifetime(instanceLock) { app.run() }

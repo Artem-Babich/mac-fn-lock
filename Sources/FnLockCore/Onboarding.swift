@@ -24,7 +24,8 @@ public struct Onboarding: Equatable, Sendable {
     /// AppKit closes windows when the app quits ("Quit & Reopen", our own restart); that is not the user finishing.
     public static func closingFinishesSetup(appIsQuitting: Bool) -> Bool { !appIsQuitting }
 
-    public static func shouldShowAtLaunch(completed: Bool, inputMonitoring: Bool) -> Bool {
-        !completed || !inputMonitoring
+    /// `wasOpenAtQuit`: the window was still open when FnLock quit or restarted (not closed by the user).
+    public static func shouldShowAtLaunch(completed: Bool, inputMonitoring: Bool, wasOpenAtQuit: Bool = false) -> Bool {
+        !completed || !inputMonitoring || wasOpenAtQuit
     }
 }
