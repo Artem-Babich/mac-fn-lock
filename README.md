@@ -31,9 +31,9 @@ On first launch, a **Welcome** window walks you through setup:
 1. **Allow Input Monitoring.** FnLock needs it to see the `fn` key. It only listens to key events and
    never changes or records them. After you switch FnLock on in **System Settings → Privacy & Security →
    Input Monitoring**, it restarts by itself within a few seconds. "Quit & Reopen" works too.
-2. **Recommended:** set **System Settings → Keyboard → "Press 🌐 key to" → "Do Nothing"**.
-   Otherwise holding `fn` may also open dictation or the emoji picker.
-3. **Try it:** hold `fn`, and the window shows the new mode.
+2. **Try it:** hold `fn`, and the window shows the new mode.
+
+You don't need to change **"Press 🌐 key to"**: a long press of `fn` doesn't switch the input source.
 
 FnLock adds itself to **System Settings → General → Login Items** so it starts at login. If you turn it off
 there, it stays off. To see the Welcome window again, open FnLock from Applications.

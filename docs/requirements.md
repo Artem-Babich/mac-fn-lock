@@ -34,13 +34,13 @@
 ## Welcome window
 - Opens at launch until setup has been finished once, and on every launch while Input Monitoring is missing.
 - Opening FnLock again (Finder, Launchpad, Spotlight) while it runs brings the window back.
-- The window is in English and shows three steps:
+- The window is in English and shows two steps:
   1. Allow Input Monitoring.
-  2. Set "Press 🌐 key to" to "Do Nothing" (recommended).
-  3. Try it: hold fn. The window shows the current mode.
-- Steps 2 and 3 are locked until step 1 is done.
+  2. Try it: hold fn. The window shows the current mode.
+- Step 2 is locked until step 1 is done.
+- FnLock doesn't ask the user to change "Press 🌐 key to". A long press doesn't trigger Change Input Source (checked on macOS 27).
 - The first click on "Allow…" shows only the macOS permission prompt, which has its own "Open System Settings" button. After that, the button reads "Open System Settings" and opens Input Monitoring itself.
 - Step 1 explains that either "Quit & Reopen" or "Later" works, because FnLock restarts by itself.
-- Each step ticks itself off: the globe key setting is re-read every second, and step 3 is done after the first switch.
+- Each step ticks itself off: step 1 when Input Monitoring is allowed, step 2 after the first switch.
 - "Done" is available once Input Monitoring is allowed.
 - Setup is finished only when the user clicks Done or closes the window. The window closing because FnLock quits or restarts ("Quit & Reopen") doesn't finish setup, so the window comes back after the restart.

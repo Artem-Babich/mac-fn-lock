@@ -6,19 +6,18 @@ extension Notification.Name {
     static let fnLockToggled = Notification.Name("FnLockToggled")
 }
 
-/// Live statuses behind the Welcome checklist, re-read every second while the window is open.
+/// Live statuses behind the Welcome checklist; the current mode is re-read every second while the window is open.
 /// Input Monitoring is fixed for the life of the process (macOS only reports a new grant to a new
 /// process), so `inputMonitoring` comes from the launch check; the app restarts itself on a grant.
 @MainActor
 final class WelcomeModel: ObservableObject {
     @Published var inputMonitoring: Bool
-    @Published var globeKeyDoesNothing = WelcomeModel.readGlobeKey()
     @Published var triedToggle = false
     @Published var standardKeys = FnKeyMode.get() ?? false
     @Published var permissionRequested = false
 
     var onboarding: Onboarding {
-        Onboarding(inputMonitoring: inputMonitoring, globeKeyDoesNothing: globeKeyDoesNothing, triedToggle: triedToggle)
+        Onboarding(inputMonitoring: inputMonitoring, triedToggle: triedToggle)
     }
 
     init(inputMonitoring: Bool) {
@@ -32,7 +31,6 @@ final class WelcomeModel: ObservableObject {
     }
 
     func refresh() {
-        globeKeyDoesNothing = Self.readGlobeKey()
         standardKeys = FnKeyMode.get() ?? standardKeys
     }
 
@@ -46,19 +44,8 @@ final class WelcomeModel: ObservableObject {
         permissionRequested = true
     }
 
-    static func openKeyboardSettings() {
-        open("x-apple.systempreferences:com.apple.Keyboard-Settings.extension")
-    }
-
     static func open(_ url: String) {
         if let url = URL(string: url) { NSWorkspace.shared.open(url) }
-    }
-
-    static func readGlobeKey() -> Bool {
-        let domain = "com.apple.HIToolbox" as CFString
-        CFPreferencesAppSynchronize(domain)
-        let value = CFPreferencesCopyAppValue("AppleFnUsageType" as CFString, domain) as? Int
-        return GlobeKeySetting.doesNothing(fnUsageType: value)
     }
 }
 
@@ -157,14 +144,7 @@ private struct WelcomeView: View {
                     .buttonStyle(.borderedProminent)
                 }
                 Divider()
-                StepRow(number: 2, title: "Set “Press 🌐 key to” to “Do Nothing”",
-                        hint: o.globeKeyStep == .locked ? "Available after step 1."
-                            : "Recommended. Otherwise holding fn may also open dictation or the emoji picker.",
-                        state: o.globeKeyStep) {
-                    Button("Open Keyboard Settings") { WelcomeModel.openKeyboardSettings() }
-                }
-                Divider()
-                StepRow(number: 3, title: "Try it",
+                StepRow(number: 2, title: "Try it",
                         hint: o.tryStep == .locked ? "Available after step 1."
                             : "Hold fn alone for about a second. Current mode: \(model.standardKeys ? "F1–F12" : "Media keys").",
                         state: o.tryStep) { EmptyView() }

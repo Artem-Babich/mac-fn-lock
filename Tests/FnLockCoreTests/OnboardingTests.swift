@@ -1,7 +1,8 @@
 // User story: the first time I open FnLock, a Welcome window walks me through setup one step at a
-// time: allow Input Monitoring, set "Press 🌐 key to" to "Do Nothing" (recommended), then try a long
-// press of fn. Each step ticks itself off as soon as it is done, without me clicking "check".
-// FnLock has no menu bar icon, so opening the app again brings the window back.
+// time: allow Input Monitoring, then try a long press of fn. Each step ticks itself off as soon as it
+// is done, without me clicking "check". FnLock has no menu bar icon, so opening the app again brings
+// the window back. FnLock does not ask me to change what the 🌐 key does: a long press works with any
+// "Press 🌐 key to" setting.
 import Foundation
 import Testing
 @testable import FnLockCore
@@ -10,29 +11,21 @@ import Testing
 struct OnboardingTests {
     @Test("before Input Monitoring is allowed, only the permission step is active")
     func permissionFirst() {
-        let o = Onboarding(inputMonitoring: false, globeKeyDoesNothing: false, triedToggle: false)
+        let o = Onboarding(inputMonitoring: false, triedToggle: false)
         #expect(o.inputMonitoringStep == .active)
-        #expect(o.globeKeyStep == .locked)
         #expect(o.tryStep == .locked)
     }
 
-    @Test("once Input Monitoring is allowed, the globe key and try steps open")
-    func permissionUnlocksRest() {
-        let o = Onboarding(inputMonitoring: true, globeKeyDoesNothing: false, triedToggle: false)
+    @Test("once Input Monitoring is allowed, the try step opens")
+    func permissionUnlocksTry() {
+        let o = Onboarding(inputMonitoring: true, triedToggle: false)
         #expect(o.inputMonitoringStep == .done)
-        #expect(o.globeKeyStep == .active)
         #expect(o.tryStep == .active)
-    }
-
-    @Test("when the globe key is already set to Do Nothing, that step is done")
-    func globeKeyDone() {
-        let o = Onboarding(inputMonitoring: true, globeKeyDoesNothing: true, triedToggle: false)
-        #expect(o.globeKeyStep == .done)
     }
 
     @Test("after the first switch with fn, the try step is done")
     func tryDone() {
-        let o = Onboarding(inputMonitoring: true, globeKeyDoesNothing: false, triedToggle: true)
+        let o = Onboarding(inputMonitoring: true, triedToggle: true)
         #expect(o.tryStep == .done)
     }
 
@@ -45,24 +38,6 @@ struct OnboardingTests {
     @Test("the window opens at launch whenever Input Monitoring is missing, even after setup")
     func showsWithoutPermission() {
         #expect(Onboarding.shouldShowAtLaunch(completed: true, inputMonitoring: false))
-    }
-}
-
-@Suite("Globe key setting")
-struct GlobeKeySettingTests {
-    @Test("Press 🌐 key to → Do Nothing is recognised")
-    func doNothing() {
-        #expect(GlobeKeySetting.doesNothing(fnUsageType: 0))
-    }
-
-    @Test("emoji, dictation or input source switching are not Do Nothing")
-    func otherActions() {
-        for value in [1, 2, 3] { #expect(!GlobeKeySetting.doesNothing(fnUsageType: value)) }
-    }
-
-    @Test("when the setting was never changed, it is not Do Nothing")
-    func unset() {
-        #expect(!GlobeKeySetting.doesNothing(fnUsageType: nil))
     }
 }
 
