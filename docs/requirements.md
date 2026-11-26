@@ -29,6 +29,7 @@
 - FnLock never asks for Input Monitoring by itself at launch. It asks only from the Welcome window.
 - Once Input Monitoring is allowed, FnLock restarts itself within a few seconds and starts working. The user doesn't need "Quit & Reopen", and choosing "Later" doesn't leave it broken.
 - A restarted copy waits for the old one to exit, so a restart never leaves FnLock stopped.
+- Only one listener runs at a time. Running `fnlock` while one is already running prints a message and exits.
 
 ## Welcome window
 - Opens at launch until setup has been finished once, and on every launch while Input Monitoring is missing.
@@ -43,4 +44,3 @@
 - Each step ticks itself off: the globe key setting is re-read every second, and step 3 is done after the first switch.
 - "Done" is available once Input Monitoring is allowed.
 - Setup is finished only when the user clicks Done or closes the window. The window closing because FnLock quits or restarts ("Quit & Reopen") doesn't finish setup, so the window comes back after the restart.
-- Only one listener runs at a time. Running `fnlock` while one is already running prints a message and exits.
