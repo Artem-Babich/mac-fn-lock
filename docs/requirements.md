@@ -26,4 +26,5 @@
 ## Start at login
 - On its first launch from an app bundle, the app adds itself to Login Items, once. If the user turns it off in System Settings → Login Items, it stays off.
 - On launch, the app removes LaunchAgents left by older versions (`rs.babich.fnlock`, `ai.fnlock`) and stops them, so two copies never run at once.
+- On first launch without Input Monitoring, FnLock asks for it and starts working as soon as it is allowed, without a restart.
 - Only one listener runs at a time. Running `fnlock` while one is already running prints a message and exits.

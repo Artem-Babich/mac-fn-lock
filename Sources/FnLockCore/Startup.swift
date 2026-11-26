@@ -39,3 +39,17 @@ public enum HoldSetting {
         [environment.flatMap(Double.init), saved].compactMap { $0 }.first { $0 > 0 } ?? 1.0
     }
 }
+
+/// Decides when to create the event tap: only once, and only after Input Monitoring is granted.
+public struct ListenerStart {
+    private var started = false
+
+    public init() {}
+
+    /// True exactly once: the first time it is called with permission granted.
+    public mutating func check(permissionGranted: Bool) -> Bool {
+        guard permissionGranted, !started else { return false }
+        started = true
+        return true
+    }
+}

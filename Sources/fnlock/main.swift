@@ -110,7 +110,7 @@ let listener = Listener()
 let mask: CGEventMask = [CGEventType.flagsChanged, .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown]
     .reduce(0) { $0 | (1 << $1.rawValue) } | (1 << 14) // 14 = NSSystemDefined (media keys)
 
-func startTap() -> Bool {
+func startTap() {
     guard let tap = CGEvent.tapCreate(
         tap: .cgSessionEventTap, place: .headInsertEventTap, options: .listenOnly,
         eventsOfInterest: mask,
@@ -119,20 +119,32 @@ func startTap() -> Bool {
             return Unmanaged.passUnretained(event)
         },
         userInfo: Unmanaged.passUnretained(listener).toOpaque()
-    ) else { return false }
+    ) else {
+        log("cannot create event tap")
+        exit(1)
+    }
     listener.tap = tap
     CFRunLoopAddSource(CFRunLoopGetCurrent(), CFMachPortCreateRunLoopSource(nil, tap, 0), .commonModes)
     CGEvent.tapEnable(tap: tap, enable: true)
     log("listening; hold fn for \(holdSeconds)s to toggle (current: \(FnKeyMode.get().map(modeName) ?? "unknown"))")
-    return true
 }
 
-if !CGPreflightListenEventAccess() { CGRequestListenEventAccess() }
-if !startTap() {
-    // Nothing restarts a Login Item, so wait here until the user allows Input Monitoring.
-    log("waiting for Input Monitoring permission: allow FnLock in System Settings → Privacy & Security")
+// macOS never delivers keyboard events to a tap created before Input Monitoring was granted, and
+// nothing restarts a Login Item, so create the tap only once the permission is there.
+var listenerStart = ListenerStart()
+let granted = CGPreflightListenEventAccess()
+log("input monitoring granted=\(granted)")
+if listenerStart.check(permissionGranted: granted) {
+    startTap()
+} else {
+    CGRequestListenEventAccess()
+    log("waiting for Input Monitoring permission: allow FnLock in System Settings → Privacy & Security → Input Monitoring")
     Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { timer in
-        if startTap() { timer.invalidate() }
+        if listenerStart.check(permissionGranted: CGPreflightListenEventAccess()) {
+            timer.invalidate()
+            log("input monitoring granted=true")
+            startTap()
+        }
     }
 }
 withExtendedLifetime(instanceLock) { app.run() }

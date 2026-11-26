@@ -113,3 +113,30 @@ struct HoldSettingTests {
         #expect(HoldSetting.seconds(environment: "0", saved: -2) == 1.0)
     }
 }
+
+// User story: on first launch I have not allowed Input Monitoring yet. FnLock must wait for my
+// permission and start working as soon as I switch it on, without me restarting it. (macOS never
+// delivers keyboard events to an event tap created before the permission was granted.)
+@Suite("Waiting for Input Monitoring")
+struct ListenerStartTests {
+    @Test("without Input Monitoring permission the listener does not start")
+    func waitsWithoutPermission() {
+        var start = ListenerStart()
+        #expect(start.check(permissionGranted: false) == false)
+        #expect(start.check(permissionGranted: false) == false)
+    }
+
+    @Test("as soon as permission is granted the listener starts")
+    func startsWhenGranted() {
+        var start = ListenerStart()
+        #expect(start.check(permissionGranted: false) == false)
+        #expect(start.check(permissionGranted: true) == true)
+    }
+
+    @Test("the listener starts only once")
+    func startsOnce() {
+        var start = ListenerStart()
+        #expect(start.check(permissionGranted: true) == true)
+        #expect(start.check(permissionGranted: true) == false)
+    }
+}
